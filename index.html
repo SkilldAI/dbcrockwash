@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rockwash | DBC Strategic Partnership</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;700;900&family=Fira+Code:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #fafaf9; scroll-behavior: smooth; }
+        h1, h2, h3, .font-heading { font-family: 'Space Grotesk', sans-serif; }
+        
+        .terminal-bg { background-color: #000000; border: 2px solid #334155; }
+        .terminal-text { font-family: 'Fira Code', monospace; font-size: 13px; line-height: 1.6; }
+
+        .log-design { color: #fde047; font-weight: 700; }
+        .log-behaviour { color: #4ade80; font-weight: 700; }
+        .log-code { color: #ffffff; font-weight: 700; }
+        .log-system { color: #22d3ee; font-weight: 700; }
+        .log-time { color: #64748b; font-weight: 500; }
+
+        .data-feed::-webkit-scrollbar { width: 8px; }
+        .data-feed::-webkit-scrollbar-track { background: #000; }
+        .data-feed::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+        
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .nav-active { border-bottom: 3px solid #f59e0b; color: #0f172a !important; }
+        .hidden-view { display: none; }
+        
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-8px); border-color: #f59e0b; box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+
+        .step-circle { position: relative; }
+        .step-circle::after { content: ''; position: absolute; top: 100%; left: 50%; width: 2px; height: 100%; background: #e2e8f0; z-index: -1; }
+        .step-circle:last-child::after { display: none; }
+    </style>
+</head>
+<body class="text-slate-900 antialiased overflow-x-hidden">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 bg-white/95 backdrop-blur-md z-50 border-b border-stone-200 h-20">
+        <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('dashboard')">
+                <div class="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center text-amber-500 font-bold text-xl shadow-lg">D</div>
+                <div class="flex flex-col">
+                    <span class="font-bold text-lg leading-none uppercase tracking-tighter text-slate-900">Rockwash <span class="text-amber-600 font-black">DBC</span></span>
+                    <span class="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1 leading-none">Design • Behaviour • Codes</span>
+                </div>
+            </div>
+            <div class="flex space-x-8 text-[10px] font-black uppercase tracking-widest text-slate-500 h-full items-center">
+                <button id="nav-dashboard" onclick="switchView('dashboard')" class="h-full px-2 transition-all nav-active hover:text-slate-900">1. Dashboard</button>
+                <button id="nav-strategy" onclick="switchView('strategy')" class="h-full px-2 transition-all hover:text-slate-900">2. Value Case</button>
+                <button id="nav-ceo" onclick="switchView('ceo')" class="h-full px-2 transition-all hover:text-slate-900 bg-amber-500/5 text-amber-600">3. CEO Blueprint</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- VIEW 1: GOVERNANCE DASHBOARD -->
+    <section id="view-dashboard" class="fade-in">
+        <header class="bg-slate-900 text-white py-24 px-4 text-center">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-5xl md:text-7xl font-bold mb-8 tracking-tight leading-none text-white">The Governance <span class="text-amber-500 italic font-light underline decoration-slate-700 underline-offset-8">Console</span></h1>
+                <p class="text-xl text-slate-400 font-light max-w-2xl mx-auto leading-relaxed">
+                    Automated Design-Behaviour-Codes handoff. Monitoring geological lab hardware in real-time with immutable proof.
+                </p>
+            </div>
+        </header>
+
+        <div class="max-w-7xl mx-auto px-4 py-16">
+            <div class="bg-slate-900 rounded-[3rem] shadow-2xl overflow-hidden border border-slate-800">
+                <div class="bg-slate-800/50 px-10 py-10 border-b border-slate-700 flex flex-wrap justify-between items-center gap-6">
+                    <div class="flex items-center space-x-12">
+                        <div>
+                            <span class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Process Integrity</span>
+                            <span id="integrity-score" class="text-3xl font-bold text-emerald-400 tracking-tighter">100.0%</span>
+                        </div>
+                        <div class="w-px h-12 bg-slate-700"></div>
+                        <div>
+                            <span class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">DBC Height</span>
+                            <span id="chain-height" class="text-3xl font-bold text-white tracking-tighter">4,812</span>
+                        </div>
+                    </div>
+                    <button id="pauseBtn" class="bg-slate-700 hover:bg-slate-600 text-white px-8 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest">Pause Stream</button>
+                </div>
+
+                <div class="p-8 md:p-12 lg:p-16">
+                    <div class="grid lg:grid-cols-4 gap-12">
+                        <div class="lg:col-span-1 space-y-8">
+                            <div class="bg-slate-800/80 p-8 rounded-3xl border border-slate-700">
+                                <h4 class="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-8">Active Gates</h4>
+                                <div id="gate-list" class="space-y-6">
+                                    <div class="gate-row text-amber-500 flex items-center text-sm font-bold" data-gate="1">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500 mr-4 shadow-[0_0_12px_#f59e0b]"></span> Intake
+                                    </div>
+                                    <div class="gate-row text-slate-600 opacity-50 flex items-center text-sm font-bold" data-gate="2">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-slate-700 mr-4"></span> Washing
+                                    </div>
+                                    <div class="gate-row text-slate-600 opacity-50 flex items-center text-sm font-bold" data-gate="3">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-slate-700 mr-4"></span> Imaging
+                                    </div>
+                                    <div class="gate-row text-slate-600 opacity-50 flex items-center text-sm font-bold" data-gate="4">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-slate-700 mr-4"></span> Analysis
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-3 terminal-bg rounded-[2.5rem] p-10 h-[600px] overflow-y-auto data-feed terminal-text" id="termScroll">
+                            <div id="termContent" class="space-y-4">
+                                <div class="text-emerald-400 font-black border-b border-emerald-900/50 pb-4 mb-8 uppercase tracking-[0.3em]">// BOOT COMPLETE: ENGINE ONLINE //</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW 2: STRATEGIC VALUE -->
+    <section id="view-strategy" class="hidden-view fade-in">
+        <header class="bg-white py-24 px-4 text-center border-b border-stone-200">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-5xl md:text-7xl font-bold mb-8 tracking-tighter leading-none text-slate-900">Why <span class="text-amber-600">DBC Adds Value</span> <br>to Rockwash</h1>
+            </div>
+        </header>
+
+        <div class="max-w-7xl mx-auto px-4 py-24">
+            <div class="grid md:grid-cols-2 gap-8 lg:gap-12">
+                <div class="card-hover bg-white p-12 rounded-[3rem] border border-stone-200">
+                    <h3 class="text-2xl font-bold text-slate-900 mb-6">Service to Infrastructure</h3>
+                    <p class="text-slate-600 leading-relaxed">Rockwash becomes the auditable ledger of geological truth, shifting from a commodity lab to a high-margin governance infrastructure partner.</p>
+                </div>
+                <div class="card-hover bg-slate-900 text-white p-12 rounded-[3rem] border-b-8 border-amber-600">
+                    <h3 class="text-2xl font-bold mb-6">Eliminating Audit Friction</h3>
+                    <p class="text-slate-400 leading-relaxed">Shorten Tier-1 sales cycles by delivering pre-audited data. The proof is in the "Codes," leaving nothing for procurement teams to question.</p>
+                </div>
+                <div class="card-hover bg-white p-12 rounded-[3rem] border border-stone-200">
+                    <h3 class="text-2xl font-bold text-slate-900 mb-6">Data Monetization</h3>
+                    <p class="text-slate-600 leading-relaxed">Turn images into "Certified Assets." Anchored data commands premium prices in secondary trading and licensing markets.</p>
+                </div>
+                <div class="card-hover bg-white p-12 rounded-[3rem] border border-stone-200">
+                    <h3 class="text-2xl font-bold text-slate-900 mb-6">Operational Quality Control</h3>
+                    <p class="text-slate-600 leading-relaxed">An automated fail-safe. If Behaviour doesn't match Design, the Code fails. Automate internal QA and reduce liability instantly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW 3: CEO EXECUTION BLUEPRINT -->
+    <section id="view-ceo" class="hidden-view fade-in">
+        <header class="bg-amber-600 text-white py-24 px-4 text-center">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-slate-900 font-black text-xs uppercase tracking-widest mb-6">Internal memo: Confidential</div>
+                <h1 class="text-5xl md:text-7xl font-bold mb-8 tracking-tighter leading-none">Indisputable <br><span class="text-slate-900">Execution</span></h1>
+                <p class="text-xl text-amber-100 font-light max-w-2xl mx-auto">How we layer DBC into Rockwash without disrupting the lab workflow.</p>
+            </div>
+        </header>
+
+        <div class="max-w-5xl mx-auto px-4 py-24">
+            <div class="space-y-24">
+                
+                <!-- Implementation Stage 1 -->
+                <div class="flex flex-col md:flex-row gap-12 items-start">
+                    <div class="md:w-1/3">
+                        <div class="w-16 h-16 bg-slate-900 text-amber-500 rounded-2xl flex items-center justify-center text-2xl font-black mb-6">01</div>
+                        <h3 class="text-3xl font-bold text-slate-900 mb-4">The Digital Overlay</h3>
+                        <p class="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Minimal Integration Cost</p>
+                    </div>
+                    <div class="md:w-2/3 bg-white p-10 rounded-[2.5rem] shadow-sm border border-stone-200">
+                        <p class="text-xl text-slate-700 leading-relaxed">
+                            DBC does not replace your technicians or your washers. It acts as a <strong>Digital Wrapper</strong>. We plug the DBC logic engine into your existing IoT sensor outputs (Scanner triggers, Washer thermal probes). 
+                        </p>
+                        <ul class="mt-8 space-y-4 text-slate-600">
+                            <li class="flex items-center"><span class="text-amber-500 mr-3 font-bold">✓</span> No change to physical sample handling</li>
+                            <li class="flex items-center"><span class="text-amber-500 mr-3 font-bold">✓</span> Zero manual data entry for the chain</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Implementation Stage 2 -->
+                <div class="flex flex-col md:flex-row gap-12 items-start">
+                    <div class="md:w-1/3">
+                        <div class="w-16 h-16 bg-slate-900 text-amber-500 rounded-2xl flex items-center justify-center text-2xl font-black mb-6">02</div>
+                        <h3 class="text-3xl font-bold text-slate-900 mb-4">The Automated Trust Gate</h3>
+                        <p class="text-slate-500 font-bold uppercase text-[10px] tracking-widest">24/7 Quality Lockdown</p>
+                    </div>
+                    <div class="md:w-2/3 bg-white p-10 rounded-[2.5rem] shadow-sm border border-stone-200">
+                        <p class="text-xl text-slate-700 leading-relaxed">
+                            Once a batch is started, the DBC engine monitors the <strong>Behaviour</strong> of the hardware. If the washer deviates by 0.5°C, the system flags it *before* the report is even generated.
+                        </p>
+                        <div class="mt-8 p-6 bg-slate-50 rounded-2xl border border-dashed border-stone-300">
+                            <p class="text-sm font-bold text-slate-400 mb-2 italic">CEO Outcome:</p>
+                            <p class="text-slate-800 font-bold">"We prove our quality mathematically. Clients cannot argue with the data."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Implementation Stage 3 -->
+                <div class="flex flex-col md:flex-row gap-12 items-start">
+                    <div class="md:w-1/3">
+                        <div class="w-16 h-16 bg-slate-900 text-amber-500 rounded-2xl flex items-center justify-center text-2xl font-black mb-6">03</div>
+                        <h3 class="text-3xl font-bold text-slate-900 mb-4">The Client Portal Lock</h3>
+                        <p class="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Market Dominance</p>
+                    </div>
+                    <div class="md:w-2/3 bg-slate-900 text-white p-10 rounded-[2.5rem] shadow-2xl">
+                        <p class="text-xl text-slate-300 leading-relaxed mb-8">
+                            Final deliverable: A digital "Truth Portal." Clients login to see not just the high-res images, but the <strong>Immutable Governance History</strong> of that sample. 
+                        </p>
+                        <div class="bg-amber-600 p-8 rounded-2xl">
+                            <h4 class="font-black uppercase tracking-widest text-xs mb-2 text-slate-900">Immediate CEO Impact</h4>
+                            <p class="text-2xl font-bold">Win the BP/Shell tender by being the only lab with a "Governance Chain."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center pt-20">
+                    <button onclick="switchView('dashboard')" class="bg-slate-900 text-amber-500 font-black px-12 py-6 rounded-full text-xl shadow-2xl hover:scale-105 transition-all">
+                        DEPLOY GOVERNANCE NOW
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-slate-950 text-slate-600 py-24 text-center border-t border-slate-900">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-center space-x-2 font-bold text-xs uppercase tracking-[0.6em] mb-4">
+                <span class="text-slate-400">Rockwash</span>
+                <span class="text-amber-500 font-black">DBC</span>
+            </div>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-700">The Indisputable Standard of Discovery</p>
+        </div>
+    </footer>
+
+    <!-- Logic Engine -->
+    <script>
+        function switchView(viewId) {
+            const views = ['dashboard', 'strategy', 'ceo'];
+            views.forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden-view');
+                document.getElementById(`nav-${v}`).classList.remove('nav-active');
+            });
+            document.getElementById(`view-${viewId}`).classList.remove('hidden-view');
+            document.getElementById(`nav-${viewId}`).classList.add('nav-active');
+            window.scrollTo(0,0);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Automated Console Logic ---
+            const termContent = document.getElementById('termContent');
+            const termScroll = document.getElementById('termScroll');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const chainHeightEl = document.getElementById('chain-height');
+            const integrityEl = document.getElementById('integrity-score');
+            const gateRows = document.querySelectorAll('.gate-row');
+
+            let chainHeight = 4812;
+            let currentStep = 0;
+            let currentGate = 1;
+            let isPaused = false;
+
+            const governanceSteps = [
+                { t: 'DESIGN', m: 'Gate [ID] Standards: Validating protocol thresholds... OK.', c: 'log-design' },
+                { t: 'DESIGN', m: 'Rule Engaged: Washer-3 Temperature set 42C (±0.5).', c: 'log-design' },
+                { t: 'BEHAVIOUR', m: 'Telemetry Ingest: Hardware active. Streaming physical data...', c: 'log-behaviour' },
+                { t: 'BEHAVIOUR', m: 'Hardware Status: Value confirmed 42.1C at T-15s.', c: 'log-behaviour' },
+                { t: 'CODE', m: 'Executing Integrity Verification: Match identified.', c: 'log-code' },
+                { t: 'CODE', m: 'ANCHOR_COMMITTED: SHA256[HASH] locked to ledger.', c: 'log-code' },
+                { t: 'SYSTEM', m: 'CLIENT PORTAL SYNC: Batch Verified Successfully.', c: 'log-system' },
+                { t: 'SPACER', m: '', c: '' }
+            ];
+
+            function getHash() { return '0x' + Math.random().toString(16).slice(2, 10).toUpperCase() + '...' + Math.random().toString(16).slice(2, 6).toUpperCase(); }
+
+            function runStream() {
+                if (isPaused) return;
+
+                const step = governanceSteps[currentStep];
+                const time = new Date().toLocaleTimeString();
+                
+                if (step.t !== 'SPACER') {
+                    const message = step.m
+                        .replace('[ID]', '0' + currentGate)
+                        .replace('[HASH]', getHash());
+
+                    const log = document.createElement('div');
+                    log.className = 'fade-in flex items-start py-1.5 border-l border-white/5 pl-6';
+                    log.innerHTML = `
+                        <span class="log-time mr-8 select-none shrink-0 font-bold tracking-tighter">[${time}]</span> 
+                        <span class="${step.c}">[${step.t}] ${message}</span>
+                    `;
+                    termContent.appendChild(log);
+                } else {
+                    const spacer = document.createElement('div');
+                    spacer.className = 'h-8';
+                    termContent.appendChild(spacer);
+                }
+
+                currentStep++;
+                if (currentStep >= governanceSteps.length) {
+                    currentStep = 0;
+                    currentGate = (currentGate % 4) + 1;
+                    chainHeight++;
+                    chainHeightEl.innerText = chainHeight.toLocaleString();
+                    integrityEl.innerText = (99.8 + (Math.random() * 0.2)).toFixed(1) + '%';
+                    
+                    gateRows.forEach((row, idx) => {
+                        const active = (idx + 1) === currentGate;
+                        row.classList.toggle('text-amber-500', active);
+                        row.classList.toggle('text-slate-600', !active);
+                        row.classList.toggle('opacity-50', !active);
+                        row.querySelector('span').className = active 
+                            ? 'w-2.5 h-2.5 rounded-full bg-amber-500 mr-4 shadow-[0_0_12px_#f59e0b]' 
+                            : 'w-2.5 h-2.5 rounded-full bg-slate-700 mr-4';
+                    });
+                }
+                termScroll.scrollTo({ top: termScroll.scrollHeight, behavior: 'smooth' });
+                if (termContent.children.length > 50) termContent.removeChild(termContent.children[1]);
+            }
+
+            setInterval(runStream, 1300);
+
+            pauseBtn.onclick = () => {
+                isPaused = !isPaused;
+                pauseBtn.innerText = isPaused ? 'Resume Stream' : 'Pause Stream';
+                pauseBtn.classList.toggle('bg-emerald-600');
+                pauseBtn.classList.toggle('bg-slate-700');
+            };
+        });
+    </script>
+</body>
+</html>
